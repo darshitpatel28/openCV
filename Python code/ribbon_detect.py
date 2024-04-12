@@ -1,47 +1,44 @@
-#INCOMPLETE 12:46 AM
-# bounds chnge karvana che line 12,13
-# only detecting attributes of id card
+# Meanshift
+#calcbackprject
+
+
 import cv2
 import numpy as np
 
-ref_img = cv2.imread(r"/home/darshit/Darshit/Studies/python/completePy/opencv/1712792170455.png")
-hsv_ref = cv2.cvtColor(ref_img, cv2.COLOR_BGR2HSV)
+ref_img = cv2.imread("/home/darshit/Darshit/Studies/python/completePy/opencv/1712792170455.png")
 
-hist_ref = cv2.calcHist([hsv_ref], [0], None, [256], [0, 256])
-cv2.normalize(hist_ref, hist_ref, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+x , y , w , h = 283,26 , 761-283 , 811-26
+t = (x , y ,w , h)
+roi = ref_img[y:y+h , x:x+w]
 
-lower_green = np.array([40, 40, 40]) # Bounds change karvana che
-upper_green = np.array([70, 255, 255]) # Boundschange karvanu che
 
-cap = cv2.VideoCapture(0)
+hsv_roi = cv2.cvtColor(roi , cv2.COLOR_BGR2HSV) 
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("Failed to capture frame")
+mask = cv2.inRange(hsv_roi , np.array((0.,60.,32.)) , np.array((180.,255.,255.)))
+
+hist = cv2.calcHist([hsv_roi],[0],mask,[180] , [0,180])
+
+cv2.normalize(hist , hist , 0 ,255 , cv2.NORM_MINMAX)
+
+terminate = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT , 10 , 1)
+
+
+
+main_video = cv2.VideoCapture(0)
+
+while main_video.isOpened():
+    bool , video_frames = main_video.read()
+
+    if bool == True:
+        hsv_video_frames = cv2.cvtColor(video_frames,cv2.COLOR_BGR2HSV)
+        searching = cv2.calcBackProject([hsv_video_frames] , [0] , hist , [0 , 180] , 1)
+        bool_shift , frames_shift = cv2.CamShift(searching , t , terminate)
+        x , y , w , h = frames_shift
+        output = cv2.rectangle(video_frames , (x , y) , (x+w , y+h) , (0,255,0) , 2)
+        cv2.imshow("output",output)
+        if cv2.waitKey(25) & 0xff == ord("q"):
+            break
+    else:
         break
 
-    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    hist_frame = cv2.calcHist([hsv_frame], [0], None, [256], [0, 256])
-    cv2.normalize(hist_frame, hist_frame, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-
-    match = cv2.compareHist(hist_ref, hist_frame, cv2.HISTCMP_BHATTACHARYYA)
-
-    threshold = 0.7
-    if match < threshold:
-        print("Ribbon detected!")
-
-        contours, _ = cv2.findContours(cv2.inRange(hsv_frame, lower_green, upper_green), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        for contour in contours:
-            x, y, w, h = cv2.boundingRect(contour)
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-    cv2.imshow('Ribbon Tracking', frame)
-
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cap.release()
 cv2.destroyAllWindows()
