@@ -42,7 +42,7 @@ def id_card_detect(user_video):
             (center_x, center_y), (width, height), angle = bool_shift
             confidence = width * height
 
-            if confidence > 1000:  # Adjust this threshold as needed
+            if confidence > 1000:  # Adjust this threshold as neede
                 if prev_rect is not None:
                     x = int((x + prev_rect[0]) / 2)
                     y = int((y + prev_rect[1]) / 2)
