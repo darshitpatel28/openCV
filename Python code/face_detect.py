@@ -4,7 +4,7 @@ import cv2
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # Function to detect faces and draw rectangles around them
-def detect_faces(image):
+def detect_faces(image): # a
     # Convert image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # Detect faces
