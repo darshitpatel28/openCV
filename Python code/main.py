@@ -1,9 +1,7 @@
-# current status : id card detection tracking
 import cv2
-import ribbon_detect as detect # detect vadi file... ( ctrl + mouse left click on ribbon_detect to redirect there )
+import ribbon_detect as detect
 
-main_video = 0  # declare dummy var
-
-detect.id_card_detect(main_video) #call kyro che function in ribbon_detect file
+user_video = "http//100.115.87.19:8080/video"
+detect.id_card_detect(user_video)
 
 cv2.destroyAllWindows()

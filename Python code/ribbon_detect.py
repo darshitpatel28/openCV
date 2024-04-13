@@ -10,8 +10,8 @@ def id_card_detect(user_video):
 
     hsv_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
-    lower_bound = np.array([105, 95, 192])  # Adjust the lower bounds based on the ID card ribbon color
-    upper_bound = np.array([255, 240, 231])  # Adjust the upper bounds based on the ID card ribbon color
+    lower_bound = np.array([105, 106, 192])
+    upper_bound = np.array([255, 240, 231])
 
     mask_roi = cv2.inRange(hsv_roi, lower_bound, upper_bound)
 
@@ -21,8 +21,7 @@ def id_card_detect(user_video):
 
     terminate = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1)
 
-    main_video = cv2.VideoCapture(user_video)
-
+    main_video = cv2.VideoCapture(user_video)   #<----------------- user video
     prev_rect = None
 
     while main_video.isOpened():
@@ -61,7 +60,6 @@ def id_card_detect(user_video):
                     state_color = (0, 0, 255)
 
                 output = cv2.rectangle(video_frames, (x, y), (x + w, y + h), state_color, 2)
-
                 text = f'Possibility: {int((confidence / (w * h)) * 100)}%'
                 cv2.putText(output, text, (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 cv2.putText(output, state, (x, y + h + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, state_color, 2)
