@@ -3,7 +3,7 @@ import numpy as np
 
 
 def id_card_detect(user_video):
-    ref_img = cv2.imread("..//res/mainribbon.png")
+    ref_img = cv2.imread("..//res/mainribbon.png") # mainribbon.png path change... repositary ma che e image
     x, y, w, h = 302, 1, 660 - 302, 940 - 1
     t = (x, y, w, h)
     roi = ref_img[y:y + h, x:x + w]
