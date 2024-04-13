@@ -1,8 +1,9 @@
-# main.py
+# current status : id card detection tracking
 import cv2
-import borders_track
-image_path = "/home/darshit/Darshit/Project/haar cascades/p/1712791875943.png"
-img = borders_track.borders_track(img_path=image_path) #bordertrack function in brodertrack py file
-cv2.imshow("contours",img)
-cv2.waitKey(0)
+import ribbon_detect as detect # detect vadi file... ( ctrl + mouse left click on ribbon_detect to redirect there )
+
+main_video = 0  # declare dummy var
+
+detect.id_card_detect(main_video) #call kyro che function in ribbon_detect file
+
 cv2.destroyAllWindows()
