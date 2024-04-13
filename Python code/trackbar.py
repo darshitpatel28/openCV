@@ -7,6 +7,7 @@ def image(x):
 img=np.zeros((500,500,3),np.uint8)*255
 
 cv2.namedWindow("colour")
+#perfect value = lower 105 , 196 , 192 AND upper value = 255 , 240 ,231
 
 cv2.createTrackbar("R","colour",0,255,image)
 cv2.createTrackbar("G","colour",0,255,image)
