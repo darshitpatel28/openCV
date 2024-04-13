@@ -2,9 +2,8 @@ import cv2
 import numpy as np
 
 
-def detect(user_video):
-
-    ref_img = cv2.imread(r"D:\opencv project\openCV\mainribbon.png")
+def id_card_detect(user_video):
+    ref_img = cv2.imread("..//res/mainribbon.png")
     x, y, w, h = 302, 1, 660 - 302, 940 - 1
     t = (x, y, w, h)
     roi = ref_img[y:y + h, x:x + w]
@@ -17,16 +16,20 @@ def detect(user_video):
     mask_roi = cv2.inRange(hsv_roi, lower_bound, upper_bound)
 
     hist = cv2.calcHist([hsv_roi], [0], mask_roi, [180], [0, 180])
+
     cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)
-    terminate = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 5, 1)  # Updated termination criteria
-    main_video = cv2.VideoCapture(user_video)  # <----------------- user video
-    prev_center = None  # Store previous center of the object
-    confidence = 0
+
+    terminate = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1)
+
+    main_video = cv2.VideoCapture(user_video)   #<----------------- user video
+    prev_rect = None
 
     while main_video.isOpened():
         bool, video_frames = main_video.read()
+
         if bool == True:
             hsv_video_frames = cv2.cvtColor(video_frames, cv2.COLOR_BGR2HSV)
+
             lb_video_frames = np.array([60, 119, 187])
             ub_video_frames = np.array([255, 255, 250])
             mask_video = cv2.inRange(hsv_video_frames, lb_video_frames, ub_video_frames)
@@ -34,32 +37,21 @@ def detect(user_video):
 
             # Remove background noise from video_frames using the mask
             bitwise_video_frames = cv2.bitwise_and(video_frames, video_frames, mask=mask_video)
+
             searching = cv2.calcBackProject([hsv_video_frames], [0], video_frame_hist, [0, 180], 1)
+
             bool_shift, frames_shift = cv2.CamShift(searching, t, terminate)
-            rect_points = cv2.boxPoints(bool_shift) if cv2.__version__.startswith('4') else cv2.cv.BoxPoints(bool_shift)
-            rect_points = np.int0(rect_points)
-            x, y, w, h = cv2.boundingRect(rect_points)
 
-            # Calculate current center of the object
-            center_x = x + w // 2
-            center_y = y + h // 2
-
-            # Check if the reference image is detected
-            if cv2.pointPolygonTest(rect_points, (center_x, center_y), False) >= 0:
-                confidence = w * h
-            else:
-                confidence = 0
+            x, y, w, h = frames_shift
+            (center_x, center_y), (width, height), angle = bool_shift
+            confidence = width * height
 
             if confidence > 1000:
-                if prev_center is not None:
-                    # Calculate distance between current and previous centers
-                    distance = np.sqrt((center_x - prev_center[0]) ** 2 + (center_y - prev_center[1]) ** 2)
-                    # Adjust rectangle size based on distance
-                    scale_factor = max(0.9, 1 - 0.1 * (distance / 50))  # Decrease size by 10% for every 50 pixels of distance
-                    w = int(w * scale_factor)
-                    h = int(h * scale_factor)
-                    x = max(0, center_x - w // 2)
-                    y = max(0, center_y - h // 2)
+                if prev_rect is not None:
+                    x = int((x + prev_rect[0]) / 2)
+                    y = int((y + prev_rect[1]) / 2)
+                    w = int((w + prev_rect[2]) / 2)
+                    h = int((h + prev_rect[3]) / 2)
 
                 state = "Id card detected"
                 state_color = (0, 0, 255)
@@ -73,16 +65,15 @@ def detect(user_video):
                 cv2.putText(output, state, (x, y + h + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, state_color, 2)
                 output = cv2.resize(output, (650, 650))
                 cv2.imshow("output", output)
-                prev_center = (center_x, center_y)
-                print("detecting")
+                prev_rect = (x, y, w, h)
             else:
                 masked_video_frames = cv2.resize(video_frames, (650, 650))
                 cv2.imshow("output", masked_video_frames)
-                print("not detecting")
 
             if cv2.waitKey(25) & 0xff == ord("q"):
                 break
         else:
             break
-    return output
+
     cv2.destroyAllWindows()
+    return output
