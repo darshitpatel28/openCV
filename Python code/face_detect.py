@@ -1,33 +1,34 @@
 import cv2
 
-# Load the cascade
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# Function to detect faces and draw rectangles around them
 def detect_faces(image): # a
-    # Convert image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # Detect faces
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4, minSize=(30, 30))
-    # Draw rectangles around the faces
     for (x, y, w, h) in faces:
         cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
     return image
 
-# Capture video from webcam
 cap = cv2.VideoCapture(0)
 
-while True:
-    # Read the frame
-    ret, frame = cap.read()
-    # Perform face detection
-    frame = detect_faces(frame)
-    # Display the frame
-    cv2.imshow('Face Detection', frame)
-    # Break the loop when 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+img_counter = 0
 
-# Release the VideoCapture object and close all windows
+while True:
+    ret, frame = cap.read()
+    frame_copy = frame.copy()
+    frame_without_rect = detect_faces(frame_copy)
+    cv2.imshow('Face Detection', frame_without_rect)
+    
+    key = cv2.waitKey(1)
+    
+    if key & 0xFF == ord('q'):
+        break
+    
+    if key & 0xFF == ord(' '):
+        img_counter += 1
+        file_path = f'D:/opencv project/detected/photo_{img_counter}.jpg'
+        cv2.imwrite(file_path, frame)
+        print(f"Saved: {file_path}")
+
 cap.release()
 cv2.destroyAllWindows()
