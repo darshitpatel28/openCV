@@ -1,7 +1,23 @@
-# 11:03 IMAGE CLICK ID CARD NOT DETECT ( STATUS PENDING )
-
 import cv2
 import numpy as np
+import time
+
+def click(main_vid, counter):
+    start_time = time.time()
+    
+    while True:
+        bool, video_frame = main_vid.read()
+        if bool:
+            cv2.imshow("output", video_frame)  # Display the video frame
+
+            if time.time() - start_time >= 3:
+                filename = f"D:/opencv project/detected/detected_{counter}.jpg"
+                cv2.imwrite(filename, video_frame)
+                print(f"Image {counter} saved")
+                return  # Exit the click function after capturing and saving the image
+
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            break
 
 def detect(user_video):
     ref_img = cv2.imread(r"D:\opencv project\openCV\mainribbon.png")
@@ -22,10 +38,12 @@ def detect(user_video):
     main_video = cv2.VideoCapture(user_video) 
     prev_center = None 
     confidence = 0
-
+    counter = 1  # Counter for dynamically generating filenames
+    start_time = time.time()  # Initialize start time for 3-second interval
+    
     while main_video.isOpened():
         bool, video_frames = main_video.read()
-        if bool == True:
+        if bool:
             hsv_video_frames = cv2.cvtColor(video_frames, cv2.COLOR_BGR2HSV)
             lb_video_frames = np.array([60, 119, 187])
             ub_video_frames = np.array([255, 255, 250])
@@ -39,11 +57,9 @@ def detect(user_video):
             rect_points = np.int0(rect_points)
             x, y, w, h = cv2.boundingRect(rect_points)
 
-            # Calculate current center of the object
             center_x = x + w // 2
             center_y = y + h // 2
 
-            # Check if the reference image is detected
             if cv2.pointPolygonTest(rect_points, (center_x, center_y), False) >= 0:
                 confidence = w * h
             else:
@@ -72,15 +88,21 @@ def detect(user_video):
                 cv2.imshow("output", output)
                 prev_center = (center_x, center_y)
                 print("detecting")
+                start_time = time.time()  # Reset start time when object is detected
             else:
                 masked_video_frames = cv2.resize(video_frames, (650, 650))
                 cv2.imshow("output", masked_video_frames)
-                
                 print("not detecting")
+                # Check if 3 seconds have passed without detection
+                if time.time() - start_time >= 3:
+                    click(main_video, counter)
+                    counter += 1
+                    start_time = time.time()  # Reset start time after capturing image
 
             if cv2.waitKey(25) & 0xff == ord("q"):
                 break
         else:
             break
-    return output
-    cv2.destroyAllWindows() 
+
+    main_video.release()
+    cv2.destroyAllWindows()

@@ -18,7 +18,7 @@ def click():
                     filename = rf"D:\opencv project\detected\detected_{counter}.jpg"
                     cv2.imwrite(filename, video_frame)
                     print(f"Saved image: {filename}")
-                    counter += 1  # Increment the counter for the next image
+                    counter += 1
                     break
 
             if cv2.waitKey(25) & 0xFF == ord('q'):
