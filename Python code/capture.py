@@ -8,7 +8,7 @@ def click():
     while True:
         # Start the timer for every iteration
         start_time = time.time()
-        
+
         while True:
             bool, video_frame = main_vid.read()
 
