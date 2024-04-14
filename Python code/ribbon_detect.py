@@ -1,19 +1,34 @@
+# 12:28 PUSH
+
 import cv2
 import numpy as np
+import time
 
+def click(main_vid, counter):
+    start_time = time.time()
+    
+    while True:
+        bool, video_frame = main_vid.read()
+        if bool:
+            cv2.imshow("output", video_frame)  # Display the video frame
+
+            if time.time() - start_time >= 3:
+                filename = f"D:/opencv project/detected/detected_{counter}.jpg"
+                cv2.imwrite(filename, video_frame)
+                print(f"Image {counter} saved")
+                return  # Exit the click function after capturing and saving the image
+
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            break
 
 def detect(user_video):
-
-    ref_img = cv2.imread(r"D:\opencv project\openCV\mainribbon.png") #WARNING sample image maro path bijo haase tamaro change karjo mainribbon.png no
+    ref_img = cv2.imread(r"D:\opencv project\openCV\mainribbon.png")
     x, y, w, h = 302, 1, 660 - 302, 940 - 1
     t = (x, y, w, h)
-
-    #starting of tracking ROI
     roi = ref_img[y:y + h, x:x + w]
 
     hsv_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
-    # perfect bounds che... lower (105,106,192) , upper(255,240,231)
     lower_bound = np.array([105, 106, 192])
     upper_bound = np.array([255, 240, 231])
 
@@ -22,29 +37,24 @@ def detect(user_video):
     hist = cv2.calcHist([hsv_roi], [0], mask_roi, [180], [0, 180])
     cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)
     terminate = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 5, 1) 
-    main_video = cv2.VideoCapture(user_video)                                         # <----------------- user video
-    prev_center = None
+    main_video = cv2.VideoCapture(user_video) 
+    prev_center = None 
     confidence = 0
-
-    # video start recording
+    counter = 1  # Counter for dynamically generating filenames
+    start_time = time.time()  # Initialize start time for 3-second interval
+    
     while main_video.isOpened():
         bool, video_frames = main_video.read()
-        if bool == True:
-            #masking and background noise remove video_frames 
+        if bool:
             hsv_video_frames = cv2.cvtColor(video_frames, cv2.COLOR_BGR2HSV)
             lb_video_frames = np.array([60, 119, 187])
             ub_video_frames = np.array([255, 255, 250])
             mask_video = cv2.inRange(hsv_video_frames, lb_video_frames, ub_video_frames)
             video_frame_hist = cv2.calcHist([hsv_video_frames], [0], mask_video, [180], [0, 180])
 
-            # bitwise and optional
             bitwise_video_frames = cv2.bitwise_and(video_frames, video_frames, mask=mask_video)
-            
-            #matching as per hsv and histogram
             searching = cv2.calcBackProject([hsv_video_frames], [0], video_frame_hist, [0, 180], 1)
             bool_shift, frames_shift = cv2.CamShift(searching, t, terminate)
-
-            # reduce vibation rect and made stable
             rect_points = cv2.boxPoints(bool_shift) if cv2.__version__.startswith('4') else cv2.cv.BoxPoints(bool_shift)
             rect_points = np.int0(rect_points)
             x, y, w, h = cv2.boundingRect(rect_points)
@@ -57,11 +67,10 @@ def detect(user_video):
             else:
                 confidence = 0
 
-            #decide the possiblity of ribbon or not between 1 to 100 in live screen
             if confidence > 1000:
                 if prev_center is not None:
                     distance = np.sqrt((center_x - prev_center[0]) ** 2 + (center_y - prev_center[1]) ** 2)
-                    scale_factor = max(0.9, 1 - 0.1 * (distance / 50)) 
+                    scale_factor = max(0.9, 1 - 0.1 * (distance / 50))
                     w = int(w * scale_factor)
                     h = int(h * scale_factor)
                     x = max(0, center_x - w // 2)
@@ -69,8 +78,6 @@ def detect(user_video):
 
                 state = "Id card detected"
                 state_color = (0, 0, 255)
-
-                #possiblity less than 60 detect person and chnage color or text 
                 if confidence < 60:
                     state = "Less possibility"
                     state_color = (0, 0, 255)
@@ -83,16 +90,21 @@ def detect(user_video):
                 cv2.imshow("output", output)
                 prev_center = (center_x, center_y)
                 print("detecting")
-                
-                # if not detecting rectangle dont come in else part
+                start_time = time.time()  # Reset start time when object is detected
             else:
                 masked_video_frames = cv2.resize(video_frames, (650, 650))
                 cv2.imshow("output", masked_video_frames)
                 print("not detecting")
+                # Check if 3 seconds have passed without detection
+                if time.time() - start_time >= 3:
+                    click(main_video, counter)
+                    counter += 1
+                    start_time = time.time()  # Reset start time after capturing image
 
             if cv2.waitKey(25) & 0xff == ord("q"):
                 break
         else:
             break
-    return output
+
+    main_video.release()
     cv2.destroyAllWindows()
