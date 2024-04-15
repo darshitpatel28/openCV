@@ -34,7 +34,7 @@ def save_to_database(timestamp, person_name, image_path, outfit_color):
 
 def click(main_vid, counter, darshit_encoding):
     start_time = time.time()
-    
+
     while True:
         bool, video_frame = main_vid.read()
         if bool:
@@ -43,15 +43,15 @@ def click(main_vid, counter, darshit_encoding):
                 filename = f"D:/opencv project/detected/detected_{counter}.jpg"
                 cv2.imwrite(filename, video_frame)
                 print(f"Image {counter} saved")
-                
+
                 x_upper, y_upper, w_upper, h_upper = 0, 0, video_frame.shape[1], int(video_frame.shape[0] * 0.5)
                 roi_upper = video_frame[y_upper:y_upper+h_upper, x_upper:x_upper+w_upper]
-                
+
                 b, g, r = np.mean(roi_upper, axis=(0, 1)).astype(int)
                 outfit_color = f"({r}, {g}, {b})"
                 print(f"Outfit RGB values: {outfit_color}")
                 timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
-                
+
                 # Perform face recognition
                 face_encoding = face_recognition.face_encodings(video_frame)
                 if len(face_encoding) > 0:
@@ -64,7 +64,7 @@ def click(main_vid, counter, darshit_encoding):
                     person_name = "Anonymous"
 
                 save_to_database(timestamp, person_name, filename, outfit_color)
-                
+
                 counter += 1  # Incrementing the counter
 
             if cv2.waitKey(25) & 0xFF == ord('q'):
@@ -92,19 +92,19 @@ def detect(user_video):
 
     hist = cv2.calcHist([hsv_roi], [0], mask_roi, [180], [0, 180])
     cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)
-    terminate = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 5, 1) 
-    main_video = cv2.VideoCapture(user_video) 
-    prev_center = None 
+    terminate = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 5, 1)
+    main_video = cv2.VideoCapture(user_video)
+    prev_center = None
     confidence = 0
-    counter = 1 
-    start_time = time.time() 
-    
+    counter = 1
+    start_time = time.time()
+
     while main_video.isOpened():
         bool, video_frames = main_video.read()
         if bool:
             gray_frame = cv2.cvtColor(video_frames, cv2.COLOR_BGR2GRAY)
             faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-            
+
             for (x, y, w, h) in faces:
                 face_encoding = face_recognition.face_encodings(video_frames, [(y, x+w, y+h, x)])[0]
                 match = face_recognition.compare_faces([darshit_encoding], face_encoding)
@@ -116,7 +116,7 @@ def detect(user_video):
 
                 cv2.rectangle(video_frames, (x, y), (x+w, y+h), (255, 0, 0), 2)
                 cv2.putText(video_frames, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            
+
             hsv_video_frames = cv2.cvtColor(video_frames, cv2.COLOR_BGR2HSV)
             lb_video_frames = np.array([60, 119, 187])
             ub_video_frames = np.array([255, 255, 250])
@@ -163,7 +163,7 @@ def detect(user_video):
                 cv2.imshow("output", output)
                 prev_center = (center_x, center_y)
                 print("detecting")
-                start_time = time.time() 
+                start_time = time.time()
             else:
                 masked_video_frames = cv2.resize(video_frames, (650, 650))
                 cv2.imshow("output", masked_video_frames)
@@ -195,13 +195,13 @@ def detect(user_video):
 
     hist = cv2.calcHist([hsv_roi], [0], mask_roi, [180], [0, 180])
     cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)
-    terminate = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 5, 1) 
-    main_video = cv2.VideoCapture(user_video) 
-    prev_center = None 
+    terminate = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 5, 1)
+    main_video = cv2.VideoCapture(user_video)
+    prev_center = None
     confidence = 0
-    counter = 1 
-    start_time = time.time() 
-    
+    counter = 1
+    start_time = time.time()
+
     while main_video.isOpened():
         bool, video_frames = main_video.read()
         if bool:
@@ -251,7 +251,7 @@ def detect(user_video):
                 cv2.imshow("output", output)
                 prev_center = (center_x, center_y)
                 print("detecting")
-                start_time = time.time() 
+                start_time = time.time()
             else:
                 masked_video_frames = cv2.resize(video_frames, (650, 650))
                 cv2.imshow("output", masked_video_frames)
