@@ -1,0 +1,88 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  .main{
+    width:100%;
+    height:auto;
+    padding: 2rem 0rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .innerdiv1{
+    width:97%;
+    height:auto;
+    padding: 1.5rem 0rem;
+    border: 1px solid black;
+    border-radius: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-style: none;
+   
+    background-color:rgb(217, 215, 215);
+    border: 1px solid rgb(166, 167, 169);
+  }
+  .innerdiv2
+  {
+    width:96.5%;
+    height:82vh;
+    border: 1px solid black;
+    border-radius: 1.5rem;
+    background-color: black;
+    display: flex;
+   
+    flex-direction: column;
+    overflow-y: auto
+  }
+  .card{
+    color: white;
+    padding: 0.5rem 2rem;
+  }
+  .subdiv1{
+       width: 100%;
+  
+  }
+  .line{
+    width:100%;
+    height:0.1rem;
+    background-color:white;
+  }
+  .text{
+    color: white;
+    text-align: center;
+  }
+  .subdiv2{
+    margin-top:2rem;
+  }
+  .tablehead{
+    color:white;
+  }
+  .subdiv3{
+    width:100%;  
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  display: flex;
+   justify-content: center;
+   
+  }
+  
+  
+  
+  table {
+   border-collapse: collapse;
+   
+  }
+  table th{
+    background-color: rgb(69, 67, 67);
+  }
+  th, td {
+     padding: 1rem 7rem;
+    text-align: center; 
+    border: 1px solid white; 
+  }
+  
+  
+  
